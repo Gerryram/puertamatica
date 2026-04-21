@@ -260,7 +260,7 @@
 // ══════════════════════════════════════════
 const CONFIG = {
   WA_NUMBER: '526644123046',       // Número sin + ni espacios
-  AGENDA_URL: 'https://calendly.com/tu-usuario',
+  AGENDA_URL: 'https://calendly.com/'gerardoakua,
   EMPRESA: 'PuertaMatica'
 };
 // ══════════════════════════════════════════
@@ -270,15 +270,26 @@ let leads=JSON.parse(localStorage.getItem('pm_leads')||'[]');
 
 function handleFile(input){
   const f=input.files[0]; if(!f)return;
-  const r=new FileReader();
-  r.onload=e=>{
-    const src=e.target.result;
-    document.getElementById('prev').src=src;
-    document.getElementById('prev').style.display='block';
-    document.getElementById('up-ph').style.display='none';
-    imgB64=src.split(',')[1];
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const MAX=1024;
+      let w=img.width, h=img.height;
+      if(w>h){if(w>MAX){h=h*(MAX/w);w=MAX;}}
+      else{if(h>MAX){w=w*(MAX/h);h=MAX;}}
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const compressed=canvas.toDataURL('image/jpeg',0.7);
+      document.getElementById('prev').src=compressed;
+      document.getElementById('prev').style.display='block';
+      document.getElementById('up-ph').style.display='none';
+      imgB64=compressed.split(',')[1];
+    };
+    img.src=e.target.result;
   };
-  r.readAsDataURL(f);
+  reader.readAsDataURL(f);
 }
 
 async function callClaude(messages, system){
