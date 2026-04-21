@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PuertaMatica — Diagnóstico Inteligente</title>
+  <meta name="description" content="Diagnóstico con IA y cotización instantánea para puertas de garaje y puertas automáticas en Tijuana.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--navy:#1a2a4a;--red:#8b2020;--light:#f5f3f0;--white:#fff;--gray:#6b7280;--border:#e2ddd8;--wa:#25D366}
+    body{font-family:'Barlow',sans-serif;background:#e8e4e0;min-height:100vh;display:flex;justify-content:center;padding:20px 0}
+    #app{background:var(--light);width:100%;max-width:480px;min-height:100vh;box-shadow:0 0 40px rgba(0,0,0,.15)}
+    .header{background:var(--navy);padding:16px 24px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
+    .brand-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700}
+    .brand-name span:first-child{color:#fff}
+    .brand-name span:last-child{color:#c0392b}
+    .brand-sub{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:1.5px;text-transform:uppercase;font-weight:500}
+    .badge-ai{margin-left:auto;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);font-size:11px;padding:4px 10px;border-radius:20px;font-weight:500}
+    .main{padding:20px}
+    .steps{display:flex;gap:4px;margin-bottom:20px}
+    .step{flex:1;padding:8px 4px;text-align:center;border-radius:6px;font-size:12px;font-weight:600;border:1.5px solid transparent;color:var(--gray)}
+    .step span{display:block;font-size:10px;font-weight:400;opacity:.8;margin-top:2px}
+    .step.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+    .step.done{background:#e8f0e8;color:#2d6a2d;border-color:#b8d4b8}
+    .card{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:20px;margin-bottom:14px}
+    .section-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--navy);letter-spacing:.3px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .icon-box{width:28px;height:28px;background:var(--navy);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .upload-zone{border:2px dashed #c5bfb8;border-radius:10px;padding:28px 20px;text-align:center;cursor:pointer;background:#faf9f7;position:relative;transition:all .2s}
+    .upload-zone:hover{border-color:var(--red);background:#fdf5f5}
+    .upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-icon{width:44px;height:44px;background:#f0ebe5;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+    .upload-text{font-size:14px;color:var(--gray);line-height:1.5}
+    .upload-text strong{color:var(--navy);display:block;margin-bottom:3px}
+    .preview-img{width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-bottom:10px}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .form-group{display:flex;flex-direction:column;gap:5px}
+    label{font-size:12px;font-weight:600;color:var(--navy);letter-spacing:.3px;text-transform:uppercase}
+    select,textarea,input[type=text],input[type=tel]{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Barlow',sans-serif;font-size:14px;color:var(--navy);background:var(--white);outline:none;transition:border .2s;-webkit-appearance:none}
+    select:focus,textarea:focus,input[type=text]:focus,input[type=tel]:focus{border-color:var(--navy)}
+    textarea{resize:none;min-height:80px;line-height:1.5}
+    .btn-primary{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:9px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;letter-spacing:.8px;cursor:pointer;text-transform:uppercase;transition:background .2s}
+    .btn-primary:hover{background:#253660}
+    .btn-primary:disabled{background:#9ba8be;cursor:not-allowed}
+    .btn-secondary{width:100%;padding:11px;background:transparent;color:var(--navy);border:1.5px solid var(--navy);border-radius:9px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:.8px;cursor:pointer;text-transform:uppercase;margin-top:8px;transition:background .2s}
+    .btn-secondary:hover{background:#f0f2f7}
+    .diag-header{background:var(--navy);padding:12px 16px;color:#fff;border-radius:10px 10px 0 0}
+    .diag-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700}
+    .diag-sub{font-size:11px;opacity:.6;letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px}
+    .diag-body{background:#fff;border:1px solid var(--border);border-top:none;padding:14px 16px;border-radius:0 0 10px 10px}
+    .diag-text{font-size:13px;line-height:1.7;color:#374151}
+    .urgency-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:8px}
+    .urgency-alta{background:#fee2e2;color:#991b1b}
+    .urgency-media{background:#fef3c7;color:#92400e}
+    .urgency-baja{background:#d1fae5;color:#065f46}
+    .tag{display:inline-block;padding:3px 8px;background:#eef2ff;color:#3730a3;border-radius:4px;font-size:11px;font-weight:600;margin:2px}
+    .tag-red{background:#fff0f0;color:#8b2020}
+    .quote-box{background:var(--navy);border-radius:12px;padding:20px;color:#fff;margin-bottom:14px}
+    .quote-label{font-size:11px;letter-spacing:1.5px;opacity:.6;text-transform:uppercase;margin-bottom:4px}
+    .quote-range{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:700;margin-bottom:4px}
+    .quote-meta{display:flex;gap:12px;margin-top:8px;flex-wrap:wrap}
+    .quote-chip{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:4px 10px;font-size:12px}
+    .quote-items{display:grid;gap:8px}
+    .quote-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--white);border:1px solid var(--border);border-radius:8px}
+    .qi-name{font-size:13px;color:var(--navy);font-weight:500}
+    .qi-price{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--red)}
+    .lead-card{background:var(--white);border-radius:12px;border:2px solid var(--navy);padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
+    .lead-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--navy),var(--red))}
+    .lead-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:var(--navy);margin-bottom:4px}
+    .lead-sub{font-size:12px;color:var(--gray);margin-bottom:16px;line-height:1.5}
+    .lead-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .input-wrapper{position:relative}
+    .input-wrapper svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);pointer-events:none}
+    .input-icon{padding-left:34px !important}
+    .cta-section{border-radius:12px;padding:18px;text-align:center;margin-bottom:14px;transition:background .3s}
+    .cta-locked{background:#c8cdd8;pointer-events:none}
+    .cta-unlocked{background:var(--red)}
+    .cta-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;color:#fff}
+    .cta-text{font-size:13px;opacity:.85;margin-bottom:14px;line-height:1.5;color:#fff}
+    .btn-wa{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;background:var(--wa);color:#fff;border:none;border-radius:9px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:8px;text-decoration:none;transition:opacity .2s}
+    .btn-wa.locked{background:#a0a8b8;pointer-events:none}
+    .btn-agendar{display:block;width:100%;padding:11px;background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.6);border-radius:9px;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s}
+    .btn-agendar.locked{opacity:.4;pointer-events:none}
+    .lock-hint{font-size:12px;color:rgba(255,255,255,.75);margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:5px}
+    .lead-saved{background:#edf7ed;border:1px solid #b8d4b8;border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .lead-saved-text{font-size:13px;color:#2d6a2d;font-weight:500}
+    .leads-panel{background:var(--white);border-radius:12px;border:1px solid var(--border);padding:16px;margin-top:4px;margin-bottom:14px}
+    .leads-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+    .leads-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;color:var(--navy);flex:1}
+    .leads-count{background:var(--red);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+    .clear-btn{font-size:11px;color:var(--gray);background:none;border:1px solid var(--border);border-radius:5px;padding:3px 8px;cursor:pointer}
+    .lead-row-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+    .lead-row-item:last-child{border-bottom:none}
+    .lead-avatar{width:32px;height:32px;border-radius:50%;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;flex-shrink:0}
+    .lead-info{min-width:0}
+    .lead-name{font-size:13px;font-weight:600;color:var(--navy)}
+    .lead-phone{font-size:11px;color:var(--gray)}
+    .lead-prob{font-size:11px;color:var(--red);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
+    .no-leads{text-align:center;padding:16px;color:var(--gray);font-size:13px}
+    .restart-btn{width:100%;padding:10px;background:transparent;color:var(--gray);border:1px solid var(--border);border-radius:8px;font-family:'Barlow',sans-serif;font-size:13px;cursor:pointer;margin-bottom:24px}
+    .error-box{background:#fee2e2;border:1px solid #fca5a5;border-radius:8px;padding:12px;font-size:13px;color:#991b1b;margin-bottom:12px;display:none}
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="header">
+    <svg width="38" height="38" viewBox="0 0 100 100">
+      <path d="M15 85 C15 85 10 50 35 30 L55 10 L65 30 C65 30 45 40 40 65 Z" fill="#8b2020"/>
+      <path d="M85 15 C85 15 90 50 65 70 L45 90 L35 70 C35 70 55 60 60 35 Z" fill="#e8e8ef" opacity=".85"/>
+    </svg>
+    <div>
+      <div class="brand-name"><span>Puerta</span><span>Matica</span></div>
+      <div class="brand-sub">Diagnóstico Inteligente</div>
+    </div>
+    <div class="badge-ai">IA Activa</div>
+  </div>
+
+  <div class="main">
+    <div class="steps" id="steps">
+      <div class="step active" id="s1">1<span>Diagnóstico</span></div>
+      <div class="step" id="s2">2<span>Detalles</span></div>
+      <div class="step" id="s3">3<span>Cotización</span></div>
+    </div>
+
+    <!-- VISTA 1 -->
+    <div id="view-1">
+      <div class="card">
+        <div class="section-title">
+          <div class="icon-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+          Foto del problema
+        </div>
+        <div class="upload-zone">
+          <input type="file" id="fi" accept="image/*" onchange="handleFile(this)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;z-index:2">
+          <div id="up-ph">
+            <div class="upload-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8b2020" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+            <div class="upload-text"><strong>Sube una foto del problema</strong>Toca para seleccionar · JPG o PNG</div>
+          </div>
+          <img id="prev" class="preview-img" style="display:none"/>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-title">
+          <div class="icon-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          Describe el problema
+        </div>
+        <div id="err1" class="error-box">Por favor sube una foto o describe el problema.</div>
+        <textarea id="prob" placeholder="Ej: La puerta no sube completamente, hace ruido raro, el motor se traba..."></textarea>
+      </div>
+      <button class="btn-primary" id="diagBtn" onclick="runDiagnosis()">Analizar con IA →</button>
+    </div>
+
+    <!-- VISTA 2 -->
+    <div id="view-2" style="display:none">
+      <div class="card">
+        <div class="section-title">
+          <div class="icon-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
+          Diagnóstico IA
+        </div>
+        <div id="diagResult"></div>
+      </div>
+      <div class="card">
+        <div class="section-title">
+          <div class="icon-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+          Datos de tu puerta
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Tipo</label>
+            <select id="tipo">
+              <option value="">Seleccionar</option>
+              <option value="seccional">Seccional (paneles)</option>
+              <option value="enrollable">Enrollable</option>
+              <option value="batiente">Batiente</option>
+              <option value="corredera">Corredera</option>
+              <option value="basculante">Basculante</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Material</label>
+            <select id="mat">
+              <option value="">Seleccionar</option>
+              <option value="acero">Acero</option>
+              <option value="aluminio">Aluminio</option>
+              <option value="madera">Madera</option>
+              <option value="pvc">PVC</option>
+            </select>
+          </div>
+          <div class="form-group"><label>¿Tiene motor?</label>
+            <select id="motor"><option value="si">Sí, automatizada</option><option value="no">No, manual</option></select>
+          </div>
+          <div class="form-group"><label>Antigüedad</label>
+            <select id="ant"><option value="nueva">Menos de 2 años</option><option value="media">2 a 7 años</option><option value="vieja">Más de 7 años</option></select>
+          </div>
+        </div>
+        <div id="err2" class="error-box">Selecciona tipo y material de la puerta.</div>
+        <button class="btn-primary" id="quoteBtn" onclick="runQuote()">Generar cotización →</button>
+        <button class="btn-secondary" onclick="goBack()">← Volver</button>
+      </div>
+    </div>
+
+    <!-- VISTA 3 -->
+    <div id="view-3" style="display:none">
+      <div id="quoteContent"></div>
+
+      <div class="lead-card">
+        <div class="lead-title">¿A quién le enviamos la cotización?</div>
+        <div class="lead-sub">Ingresa tus datos para desbloquear el botón de WhatsApp y recibir el desglose completo.</div>
+        <div class="lead-row">
+          <div class="form-group">
+            <label>Nombre</label>
+            <div class="input-wrapper">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input type="text" id="leadName" class="input-icon" placeholder="Tu nombre" oninput="checkLead()">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <div class="input-wrapper">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" style="position:absolute;left:10px;top:50%;transform:translateY(-50%)"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8 9a16 16 0 0 0 5.54 5.54l.87-.87a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              <input type="tel" id="leadPhone" class="input-icon" placeholder="664 000 0000" oninput="checkLead()">
+            </div>
+          </div>
+        </div>
+        <div id="leadSaved" style="display:none" class="lead-saved">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2d6a2d" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="lead-saved-text" id="leadSavedText">Datos guardados</span>
+        </div>
+      </div>
+
+      <div class="cta-section cta-locked" id="ctaSection">
+        <div class="cta-title">¿Listo para resolver tu problema?</div>
+        <div class="cta-text">Escríbenos por WhatsApp con tu cotización. Visita de diagnóstico sin costo.</div>
+        <div class="lock-hint" id="lockHint">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.75)" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Ingresa nombre y teléfono para desbloquear
+        </div>
+        <a class="btn-wa locked" id="btnWA" href="#" onclick="return false">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Enviar por WhatsApp
+        </a>
+        <button class="btn-agendar locked" id="btnAgendar" onclick="openAgenda()">📅 Agendar visita sin costo</button>
+      </div>
+
+      <div class="leads-panel">
+        <div class="leads-header">
+          <span class="leads-title">Leads capturados</span>
+          <span class="leads-count" id="leadsCount">0</span>
+          <button class="clear-btn" onclick="clearLeads()">Limpiar</button>
+        </div>
+        <div id="leadsList"><div class="no-leads">Aún no hay leads</div></div>
+      </div>
+
+      <button class="restart-btn" onclick="restart()">↩ Nuevo diagnóstico</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  CONFIGURACIÓN
+// ══════════════════════════════════════════
+const CONFIG = {
+  WA_NUMBER: '526641234567',       // Número sin + ni espacios
+  AGENDA_URL: 'https://calendly.com/tu-usuario',
+  EMPRESA: 'PuertaMatica'
+};
+// ══════════════════════════════════════════
+
+let imgB64=null, diagData=null, quoteData=null, quoteParams=null;
+let leads=JSON.parse(localStorage.getItem('pm_leads')||'[]');
+
+function handleFile(input){
+  const f=input.files[0]; if(!f)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const MAX=1024;
+      let w=img.width, h=img.height;
+      if(w>h){if(w>MAX){h=Math.round(h*(MAX/w));w=MAX;}}
+      else{if(h>MAX){w=Math.round(w*(MAX/h));h=MAX;}}
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const compressed=canvas.toDataURL('image/jpeg',0.7);
+      document.getElementById('prev').src=compressed;
+      document.getElementById('prev').style.display='block';
+      document.getElementById('up-ph').style.display='none';
+      imgB64=compressed.split(',')[1];
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+
+async function callClaude(messages, system){
+  const body={model:'claude-sonnet-4-20250514',max_tokens:1000,messages};
+  if(system)body.system=system;
+  const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const d=await r.json();
+  if(d.error)throw new Error(d.error);
+  return d.content?.[0]?.text||'';
+}
+
+async function runDiagnosis(){
+  const prob=document.getElementById('prob').value.trim();
+  if(!imgB64&&!prob){document.getElementById('err1').style.display='block';return;}
+  document.getElementById('err1').style.display='none';
+  const btn=document.getElementById('diagBtn');
+  btn.disabled=true; btn.textContent='Analizando...';
+  const content=[];
+  if(imgB64)content.push({type:'image',source:{type:'base64',media_type:'image/jpeg',data:imgB64}});
+  content.push({type:'text',text:prob||'Analiza esta imagen de una puerta de garaje.'});
+  const sys=`Eres el asistente de diagnóstico de ${CONFIG.EMPRESA}, especialista en puertas de garaje y automáticas en Tijuana/San Diego. Responde ÚNICAMENTE en JSON válido sin backticks ni texto extra:
+{"problema":"nombre corto del problema","descripcion":"2-3 oraciones claras para el cliente","urgencia":"alta|media|baja","causas":["causa1","causa2"],"servicios":["servicio1","servicio2"],"nota":"consejo breve de seguridad o mantenimiento"}`;
+  try{
+    const resp=await callClaude([{role:'user',content}],sys);
+    diagData=JSON.parse(resp.replace(/```json|```/g,'').trim());
+    renderDiagnosis(diagData);
+    setStep(2);
+    document.getElementById('view-1').style.display='none';
+    document.getElementById('view-2').style.display='block';
+  }catch(e){
+    alert('Error al analizar. Por favor intenta de nuevo.');
+    btn.disabled=false; btn.textContent='Analizar con IA →';
+  }
+}
+
+function renderDiagnosis(d){
+  const uc=d.urgencia==='alta'?'urgency-alta':d.urgencia==='media'?'urgency-media':'urgency-baja';
+  const ul=d.urgencia==='alta'?'⚠ Atención urgente':d.urgencia==='media'?'Atención recomendada':'Mantenimiento preventivo';
+  document.getElementById('diagResult').innerHTML=`
+    <div style="border-radius:10px;overflow:hidden">
+      <div class="diag-header"><div class="diag-sub">Problema detectado</div><div class="diag-title">${d.problema}</div></div>
+      <div class="diag-body">
+        <span class="urgency-badge ${uc}">${ul}</span>
+        <p class="diag-text">${d.descripcion}</p>
+        ${d.causas?.length?`<p style="font-size:12px;font-weight:600;color:var(--navy);margin:10px 0 5px;text-transform:uppercase;letter-spacing:.5px">Posibles causas</p><div>${d.causas.map(c=>`<span class="tag">${c}</span>`).join('')}</div>`:''}
+        ${d.servicios?.length?`<p style="font-size:12px;font-weight:600;color:var(--navy);margin:10px 0 5px;text-transform:uppercase;letter-spacing:.5px">Servicios sugeridos</p><div>${d.servicios.map(s=>`<span class="tag tag-red">${s}</span>`).join('')}</div>`:''}
+        ${d.nota?`<p style="font-size:12px;color:#6b7280;margin-top:10px;font-style:italic">💡 ${d.nota}</p>`:''}
+      </div>
+    </div>`;
+}
+
+async function runQuote(){
+  if(!document.getElementById('tipo').value||!document.getElementById('mat').value){
+    document.getElementById('err2').style.display='block'; return;
+  }
+  document.getElementById('err2').style.display='none';
+  const btn=document.getElementById('quoteBtn');
+  btn.disabled=true; btn.textContent='Calculando...';
+  quoteParams={tipo:document.getElementById('tipo').value,mat:document.getElementById('mat').value,motor:document.getElementById('motor').value,ant:document.getElementById('ant').value};
+  const sys=`Eres cotizador de ${CONFIG.EMPRESA} en Tijuana, México. Precios en pesos mexicanos MXN realistas para Tijuana 2025. Responde ÚNICAMENTE en JSON sin backticks ni texto extra:
+{"rango_min":0,"rango_max":0,"items":[{"nombre":"...","precio":0}],"tiempo":"X horas","garantia":"X meses","nota":"recomendación breve"}`;
+  try{
+    const resp=await callClaude([{role:'user',content:`Diagnóstico:${JSON.stringify(diagData)}. Puerta:${JSON.stringify(quoteParams)}. Genera cotización realista.`}],sys);
+    quoteData=JSON.parse(resp.replace(/```json|```/g,'').trim());
+    renderQuote(quoteData);
+    setStep(3);
+    document.getElementById('view-2').style.display='none';
+    document.getElementById('view-3').style.display='block';
+    renderLeads();
+  }catch(e){
+    alert('Error al cotizar. Por favor intenta de nuevo.');
+    btn.disabled=false; btn.textContent='Generar cotización →';
+  }
+}
+
+function renderQuote(d){
+  const fmt=n=>'$'+Number(n).toLocaleString('es-MX');
+  const items=d.items.map(i=>`<div class="quote-item"><span class="qi-name">${i.nombre}</span><span class="qi-price">${fmt(i.precio)}</span></div>`).join('');
+  document.getElementById('quoteContent').innerHTML=`
+    <div class="quote-box">
+      <div class="quote-label">Estimado de inversión</div>
+      <div class="quote-range">${fmt(d.rango_min)} — ${fmt(d.rango_max)}</div>
+      <div class="quote-meta"><span class="quote-chip">⏱ ${d.tiempo}</span><span class="quote-chip">🛡 Garantía ${d.garantia}</span></div>
+    </div>
+    <div class="card">
+      <div class="section-title" style="margin-bottom:12px">
+        <div class="icon-box"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+        Desglose del servicio
+      </div>
+      <div class="quote-items">${items}</div>
+      ${d.nota?`<p style="font-size:12px;color:#6b7280;margin-top:12px;font-style:italic">💡 ${d.nota}</p>`:''}
+    </div>`;
+}
+
+function checkLead(){
+  const name=document.getElementById('leadName').value.trim();
+  const phone=document.getElementById('leadPhone').value.trim();
+  const ok=name.length>=2&&phone.length>=7;
+  const cta=document.getElementById('ctaSection');
+  const btnWA=document.getElementById('btnWA');
+  const btnAg=document.getElementById('btnAgendar');
+  const hint=document.getElementById('lockHint');
+  const saved=document.getElementById('leadSaved');
+  if(ok){
+    cta.className='cta-section cta-unlocked';
+    btnWA.className='btn-wa'; btnAg.className='btn-agendar';
+    hint.style.display='none'; saved.style.display='flex';
+    document.getElementById('leadSavedText').textContent=`✓ ${name} — datos guardados`;
+    const waMsg=buildWAMessage(name,phone);
+    btnWA.href=`https://wa.me/${CONFIG.WA_NUMBER}?text=${encodeURIComponent(waMsg)}`;
+    btnWA.onclick=null;
+    saveLead(name,phone);
+  } else {
+    cta.className='cta-section cta-locked';
+    btnWA.className='btn-wa locked'; btnWA.href='#'; btnWA.onclick=()=>false;
+    btnAg.className='btn-agendar locked';
+    hint.style.display='flex'; saved.style.display='none';
+  }
+}
+
+function saveLead(name,phone){
+  const exists=leads.find(l=>l.phone===phone);
+  if(!exists){
+    leads.unshift({name,phone,problema:diagData?.problema||'Sin diagnóstico',urgencia:diagData?.urgencia||'—',fecha:new Date().toLocaleDateString('es-MX')});
+    if(leads.length>100)leads=leads.slice(0,100);
+    localStorage.setItem('pm_leads',JSON.stringify(leads));
+    renderLeads();
+  }
+}
+
+function buildWAMessage(name,phone){
+  const fmt=n=>'$'+Number(n).toLocaleString('es-MX');
+  const tipos={seccional:'Seccional',enrollable:'Enrollable',batiente:'Batiente',corredera:'Corredera',basculante:'Basculante'};
+  return `Hola ${CONFIG.EMPRESA} 👋\n\nMi nombre es *${name}* y mi teléfono es ${phone}.\n\nUsé su diagnóstico inteligente:\n\n🔧 *Problema:* ${diagData?.problema||'—'}\n⚠️ *Urgencia:* ${(diagData?.urgencia||'').toUpperCase()}\n\n🚪 *Mi puerta:* ${tipos[quoteParams?.tipo]||quoteParams?.tipo} · ${quoteParams?.mat} · ${quoteParams?.motor==='si'?'Con motor':'Sin motor'} · ${quoteParams?.ant==='nueva'?'< 2 años':quoteParams?.ant==='media'?'2-7 años':'> 7 años'}\n\n💰 *Cotización estimada:* ${fmt(quoteData?.rango_min)} – ${fmt(quoteData?.rango_max)} MXN\n⏱ Tiempo: ${quoteData?.tiempo} · Garantía: ${quoteData?.garantia}\n\n¿Cuándo pueden visitarme? Gracias.`;
+}
+
+function renderLeads(){
+  document.getElementById('leadsCount').textContent=leads.length;
+  if(!leads.length){document.getElementById('leadsList').innerHTML='<div class="no-leads">Aún no hay leads</div>';return;}
+  document.getElementById('leadsList').innerHTML=leads.map(l=>`
+    <div class="lead-row-item">
+      <div class="lead-avatar">${l.name.charAt(0).toUpperCase()}</div>
+      <div class="lead-info"><div class="lead-name">${l.name}</div><div class="lead-phone">${l.phone} · ${l.fecha}</div></div>
+      <div class="lead-prob">${l.urgencia==='alta'?'🔴':l.urgencia==='media'?'🟡':'🟢'} ${l.problema}</div>
+    </div>`).join('');
+}
+
+function clearLeads(){if(confirm('¿Borrar todos los leads guardados?')){leads=[];localStorage.removeItem('pm_leads');renderLeads();}}
+function openAgenda(){window.open(CONFIG.AGENDA_URL,'_blank')}
+function setStep(n){for(let i=1;i<=3;i++){const el=document.getElementById('s'+i);el.className='step'+(i===n?' active':i<n?' done':'');}}
+function goBack(){setStep(1);document.getElementById('view-2').style.display='none';document.getElementById('view-1').style.display='block';document.getElementById('diagBtn').disabled=false;document.getElementById('diagBtn').textContent='Analizar con IA →';}
+function restart(){
+  setStep(1);imgB64=null;diagData=null;quoteData=null;quoteParams=null;
+  document.getElementById('prev').style.display='none';
+  document.getElementById('up-ph').style.display='block';
+  document.getElementById('fi').value='';
+  document.getElementById('prob').value='';
+  document.getElementById('diagBtn').disabled=false; document.getElementById('diagBtn').textContent='Analizar con IA →';
+  document.getElementById('quoteBtn').disabled=false; document.getElementById('quoteBtn').textContent='Generar cotización →';
+  document.getElementById('leadName').value=''; document.getElementById('leadPhone').value='';
+  document.getElementById('leadSaved').style.display='none';
+  document.getElementById('view-3').style.display='none';
+  document.getElementById('view-1').style.display='block';
+  checkLead();
+}
+
+renderLeads();
+</script>
+</body>
+</html>
