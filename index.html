@@ -199,21 +199,8 @@
           </div>
         </div>
         <div id="err2" class="error-box">Selecciona tipo y material de la puerta.</div>
-        <button class="btn-primary" id="quoteBtn" onclick="runQuote(const sys=`Eres cotizador de ${CONFIG.EMPRESA} en Tijuana, México. 
-Precios en pesos mexicanos MXN para Tijuana 2025. 
-Usa ESTRICTAMENTE estos rangos base:
-- Diagnóstico/visita: $150–$300
-- Resortes/cables: $2,500–$3,900
-- Motor seccional: $1,500–$2,600
-- Motor enrollable: $2,500–$8,000
-- Reparacion cable: $1,100 - $1, 400
-- Panel dañado (seccional): $700–$1,400
-- Riel/guía: $2,000–$2,500
-- Servicio completo de motor: $2,600–$4,200
-Ajusta según antigüedad (nueva=menor precio, vieja=+15%) y material (aluminio=base, madera=+10%, acero=+8%).
-En el campo "nota" SIEMPRE incluye esta advertencia: "⚠️ Estos precios son una estimación referencial. El precio final se determina durante el diagnóstico presencial."
-Responde ÚNICAMENTE en JSON sin backticks ni texto extra:
-{"rango_min":0,"rango_max":0,"items":[{"nombre":"...","precio":0}],"tiempo":"X horas","garantia":"X meses","nota":"..."}`;)">Generar cotización →</button>
+        <button class="btn-primary" id="quoteBtn" onclick="runQuote()`Eres cotizador de ${CONFIG.EMPRESA} en Tijuana, México. 
+          btn.disabled=true; btn.textContent='Calculando...'; →</button>
         <button class="btn-secondary" onclick="goBack()">← Volver</button>
       </div>
     </div>
