@@ -362,8 +362,8 @@ async function runQuote(){
   const btn=document.getElementById('quoteBtn');
   btn.disabled=true; btn.textContent='Calculando...';
   quoteParams={tipo:document.getElementById('tipo').value,mat:document.getElementById('mat').value,motor:document.getElementById('motor').value,ant:document.getElementById('ant').value};
-  const sys=`Eres cotizador de ${CONFIG.EMPRESA} en Tijuana, México. Precios en pesos mexicanos MXN realistas para Tijuana 2025. Responde ÚNICAMENTE en JSON sin backticks ni texto extra:
-{"rango_min":0,"rango_max":0,"items":[{"nombre":"...","precio":0}],"tiempo":"X horas","garantia":"X meses","nota":"recomendación breve"}`;
+ const sys=`Eres cotizador de ${CONFIG.EMPRESA} en Tijuana, México. Precios en pesos mexicanos MXN para Tijuana 2025. Usa ESTRICTAMENTE estos rangos base: - Diagnóstico/visita: $150–$300 - Resortes/cables: $450–$800 - Motor seccional: $1,500–$2,600 - Motor enrollable: $1,300–$2,400 - Panel dañado (seccional): $700–$1,400 - Riel/guía: $350–$700 - Cerradura/manija: $200–$500 - Servicio completo con motor nuevo: $2,600–$4,200 Ajusta según antigüedad (nueva=menor precio, vieja=+15%) y material (aluminio=base, madera=+10%, acero=+8%). En el campo "nota" SIEMPRE incluye esta advertencia: "⚠️ Estos precios son una estimación referencial. El precio final se determina durante el diagnóstico presencial."
+ {"rango_min":0,"rango_max":0,"items":[{"nombre":"...","precio":0}],"tiempo":"X horas","garantia":"X meses","nota":"recomendación breve"}`;
   try{
     const resp=await callClaude([{role:'user',content:`Diagnóstico:${JSON.stringify(diagData)}. Puerta:${JSON.stringify(quoteParams)}. Genera cotización realista.`}],sys);
     quoteData=JSON.parse(resp.replace(/```json|```/g,'').trim());
