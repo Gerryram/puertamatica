@@ -461,7 +461,7 @@ function renderLeads(){
 }
 
 function clearLeads(){if(confirm('¿Borrar todos los leads guardados?')){leads=[];localStorage.removeItem('pm_leads');renderLeads();}}
-function openAgenda(){window.open(CONFIG.AGENDA_URL,'_blank')}
+function openAgenda(){gtag('event','click_agendar',{cliente:document.getElementById('leadName').value||'—',urgencia:diagData?.urgencia||'—'});window.open(CONFIG.AGENDA_URL,'_blank');}
 function setStep(n){for(let i=1;i<=3;i++){const el=document.getElementById('s'+i);el.className='step'+(i===n?' active':i<n?' done':'');}}
 function goBack(){setStep(1);document.getElementById('view-2').style.display='none';document.getElementById('view-1').style.display='block';document.getElementById('diagBtn').disabled=false;document.getElementById('diagBtn').textContent='Analizar con IA →';}
 function restart(){
